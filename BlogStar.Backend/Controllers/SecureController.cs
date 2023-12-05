@@ -15,6 +15,7 @@ namespace BlogStar.Backend.Controllers
     [Route("api/[controller]")]
     public class SecureController : ControllerBase
     {
+
         [HttpGet("secure-data")]
         public IActionResult GetSecureData()
         {

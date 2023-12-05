@@ -12,7 +12,7 @@ namespace BlogStar.Backend.Data
 
             }
             public DbSet<Blog> Blogs { get; set; }
-            public DbSet<UserDto> Users { get; set; }
+            public DbSet<UserModel> Users { get; set; }
            
             public DbSet<Article> Articles { get; set; }
             public DbSet<Comment> Comments { get; set; }

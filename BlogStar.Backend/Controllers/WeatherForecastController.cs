@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogStar.Backend.Controllers
 {
-    [Authorize]
+   
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

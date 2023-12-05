@@ -1,4 +1,5 @@
-﻿using BlogStar.Backend.Models;
+﻿using BlogStar.Backend.Data;
+using BlogStar.Backend.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace BlogStar.Backend.Interfaces
 {
     public interface IUserRepository
     {
-        UserDto GetUser(UserModel userModel);
+        UserDto GetUser(LoginRequest userModel, BlogStarDbContext _dbContext);
     }
 
 }
