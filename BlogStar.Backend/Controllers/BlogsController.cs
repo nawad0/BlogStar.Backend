@@ -10,6 +10,8 @@ using BlogStar.Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Humanizer;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlogStar.Backend.Controllers
 {
@@ -115,65 +117,36 @@ namespace BlogStar.Backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Blogs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //[Authorize]
-        //public async Task<ActionResult<Blog>> PostBlog(Blog blog)
-        //{
-        //  if (_context.Blogs == null)
-        //  {
-        //      return Problem("Entity set 'BlogStarDbContext.Blogs'  is null.");
-        //  }
-        //    _context.Blogs.Add(blog);
-        //    await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetBlog", new { id = blog.BlogId }, blog);
-        //}
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
             try
             {
-
                 var currentUserName = HttpContext.User.Identity.Name;
-
-                // Ищем пользователя в базе данных по имени
                 var currentUser = await _context.Users.SingleOrDefaultAsync(u => u.UserName == currentUserName);
 
-                // Проверяем, найден ли пользователь
                 if (currentUser == null)
                 {
-                    return Unauthorized(); // Пользователь не найден
+                    return Unauthorized();
                 }
 
-                // Устанавливаем OwnerUserId блога
                 blog.OwnerUserId = currentUser.UserId;
-
-                // Проверяем, что _context не равен null
-                if (_context == null)
-                {
-                    return Problem("BlogStarDbContext is null.");
-                }
-
-                // Проверяем, что _context.Blogs не равен null
-                if (_context.Blogs == null)
-                {
-                    return Problem("Entity set 'BlogStarDbContext.Blogs' is null.");
-                }
-
+                blog.CreationDate = DateTime.UtcNow;
+                blog.UserName = currentUserName;
                 _context.Blogs.Add(blog);
                 await _context.SaveChangesAsync();
 
+                // The blog object now has the automatically generated BlogId
                 return CreatedAtAction("GetBlog", new { id = blog.BlogId }, blog);
             }
             catch (Exception ex)
             {
-                // Обработка ошибок
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
+
 
 
         // DELETE: api/Blogs/5
