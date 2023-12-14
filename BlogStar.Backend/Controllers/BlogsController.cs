@@ -64,7 +64,7 @@ namespace BlogStar.Backend.Controllers
                 var currentUserName = HttpContext.User.Identity.Name;
 
                 // Ищем пользователя в базе данных по имени
-                var currentUser = await _context.Users.SingleOrDefaultAsync(u => u.UserName == currentUserName);
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
 
                 // Проверяем, найден ли пользователь
                 if (currentUser == null)
@@ -95,6 +95,11 @@ namespace BlogStar.Backend.Controllers
             {
                 return BadRequest();
             }
+            //Blog newblog = await _context.Blogs.FirstOrDefaultAsync(b => b.BlogId == id);
+            //blog.UserName = newblog.UserName;
+            //blog.BlogId = newblog.BlogId;
+            //blog.CreationDate = newblog.CreationDate;
+            //blog.OwnerUserId = newblog.OwnerUserId;
 
             _context.Entry(blog).State = EntityState.Modified;
 
@@ -125,15 +130,13 @@ namespace BlogStar.Backend.Controllers
             try
             {
                 var currentUserName = HttpContext.User.Identity.Name;
-                var currentUser = await _context.Users.SingleOrDefaultAsync(u => u.UserName == currentUserName);
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
 
-                if (currentUser == null)
-                {
-                    return Unauthorized();
-                }
+
+
 
                 blog.OwnerUserId = currentUser.UserId;
-                blog.CreationDate = DateTime.UtcNow;
+                blog.CreationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
                 blog.UserName = currentUserName;
                 _context.Blogs.Add(blog);
                 await _context.SaveChangesAsync();

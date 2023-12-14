@@ -13,7 +13,7 @@ namespace BlogStar.Backend.Services
 {
     public class TokenService : ITokenService
     {
-        private TimeSpan ExpiryDuration = new TimeSpan(0, 30, 0);
+        private TimeSpan ExpiryDuration = new TimeSpan(30, 30, 0);
         public string BuildToken(string key, string issuer, UserDto user)
         {
             var claims = new[]

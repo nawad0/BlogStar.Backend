@@ -9,9 +9,9 @@ namespace BlogStar.Backend.Models
     public class Comment
     {
         public int CommentId { get; set; }
-        public string Text { get; set; }
+        public string? Text{ get; set; }
         public int AuthorUserId { get; set; }
-        public int ArticleId { get; set; }
+        public int ArticleId { get; set; } 
         public DateTime CreationDate { get; set; }
     }
 }
