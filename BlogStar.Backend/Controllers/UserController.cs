@@ -50,6 +50,104 @@ namespace BlogStar.Backend.Controllers
 
             return Ok(new { Token = token });
         }
+
+        [HttpPost("article")]
+        [Authorize]
+        public ActionResult AddArticle([FromQuery] int articleId)
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Unauthorized("User not authenticated.");
+                }
+
+                var currentUserName = HttpContext.User.Identity.Name;
+                var currentUser = _dbContext.Users.FirstOrDefault(u => u.UserName == currentUserName);
+
+                if (currentUser == null)
+                {
+                    return Unauthorized("User not found.");
+                }
+
+                // Инициализируем FavoriteArticles, если это еще не сделано
+                currentUser.FavoriteArticles ??= "";
+
+                // Проверяем, содержится ли articleId в списке FavoriteArticles
+                if (currentUser.FavoriteArticles.Contains(articleId.ToString()))
+                {
+                    // Если содержится, удаляем
+                    currentUser.FavoriteArticles = string.Join(",", currentUser.FavoriteArticles
+                        .Split(',')
+                        .Where(id => id != articleId.ToString()));
+                }
+                else
+                {
+                    // Если не содержится, добавляем
+                    currentUser.FavoriteArticles = string.IsNullOrEmpty(currentUser.FavoriteArticles)
+                        ? articleId.ToString()
+                        : $"{currentUser.FavoriteArticles},{articleId}";
+                }
+
+                // Сохраняем изменения в базе данных
+                _dbContext.SaveChanges();
+
+                return Ok(articleId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("favorite-articles")]
+        [Authorize] // Require authentication to access this endpoint
+        public ActionResult<List<Article>> GetFavoriteArticles()
+        {
+            try
+            {
+                // Ensure the user is authenticated
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Unauthorized("User not authenticated.");
+                }
+
+                // Получаем имя текущего пользователя из контекста аутентификации
+                var currentUserName = HttpContext.User.Identity.Name;
+
+                // Получаем пользователя из базы данных по его имени
+                var currentUser = _dbContext.Users.FirstOrDefault(u => u.UserName == currentUserName);
+
+                if (currentUser == null)
+                {
+                    return Unauthorized("User not found.");
+                }
+
+                // Разбиваем строку на список (используя запятую как разделитель)
+                var favoriteArticleIds = currentUser.FavoriteArticles?.Split(',')
+                    .Where(id => !string.IsNullOrEmpty(id))
+                    .Select(id => int.TryParse(id, out var parsedId) ? parsedId : -1)
+                    .Where(parsedId => parsedId != -1)
+                    .ToList();
+
+                if (favoriteArticleIds == null)
+                {
+                    // Handle the case where FavoriteArticles is null
+                    favoriteArticleIds = new List<int>();
+                }
+
+                // Получаем статьи из базы данных по ID
+                var favoriteArticles = _dbContext.Articles.Where(a => favoriteArticleIds.Contains(a.ArticleId)).ToList();
+
+                return Ok(favoriteArticles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
+
+
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegistrationRequest registerModel)
         {
@@ -98,7 +196,7 @@ namespace BlogStar.Backend.Controllers
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpireMinutes"])),
+                expires: DateTime.Now.AddDays(Convert.ToDouble(_configuration["Jwt:ExpireMinutes"])),
                 signingCredentials: creds
             );
 

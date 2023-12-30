@@ -9,6 +9,9 @@ using BlogStar.Backend.Data;
 using BlogStar.Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection.Metadata;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using System.Text.Json;
 
 namespace BlogStar.Backend.Controllers
 {
@@ -28,10 +31,10 @@ namespace BlogStar.Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Article>> GetArticle(int id)
         {
-          if (_context.Articles == null)
-          {
-              return NotFound();
-          }
+            if (_context.Articles == null)
+            {
+                return NotFound();
+            }
             var article = await _context.Articles.FindAsync(id);
 
             if (article == null)
@@ -120,25 +123,119 @@ namespace BlogStar.Backend.Controllers
         [Authorize]
         public async Task<ActionResult<Article>> PostArticle(int blogId, [FromBody] Article article)
         {
-            // ваш код обработки POST-запроса
-        
             var currentUserName = HttpContext.User.Identity.Name;
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
 
-            
             if (_context.Articles == null)
             {
-                return Problem("Entity set 'BlogStarDbContext.Articles'  is null.");
+                return Problem("Entity set 'BlogStarDbContext.Articles' is null.");
             }
+
+            // Don't set the ArticleId, let the database generate it
             article.BlogId = blogId;
             article.AuthorUserName = currentUserName;
             article.AuthorUserId = currentUser.UserId;
             article.PublicationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
+
             _context.Articles.Add(article);
             await _context.SaveChangesAsync();
 
+            // Return the article with the generated ArticleId
             return CreatedAtAction("GetArticle", new { id = article.ArticleId }, article);
         }
+
+        [HttpPost("add")]
+        [Authorize]
+        public async Task<IActionResult> AddLike([FromQuery] int articleId)
+        {
+            if (articleId <= 0)
+            {
+                return BadRequest("Invalid ArticleId.");
+            }
+
+            // Get the current user
+            var currentUserName = HttpContext.User.Identity.Name;
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
+
+            if (currentUser == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var article = await _context.Articles
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+            if (article == null)
+            {
+                return NotFound("Article not found.");
+            }
+
+            // Deserialize the JSON string to a List<Like>
+            var likes = string.IsNullOrEmpty(article.LikesJson)
+                ? new List<Like>()
+                : JsonSerializer.Deserialize<List<Like>>(article.LikesJson);
+
+            // Check if the user has already liked the article
+            var existingLike = likes.FirstOrDefault(l => l.UserId == currentUser.UserId);
+
+            if (existingLike != null)
+            {
+                // User has already liked the article, remove the like
+                likes.Remove(existingLike);
+            }
+            else
+            {
+                // User hasn't liked the article, add a new like
+                var newLike = new Like { UserId = currentUser.UserId };
+                likes.Add(newLike);
+            }
+
+            // Serialize the List<Like> back to JSON string
+            article.LikesJson = JsonSerializer.Serialize(likes);
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Like updated successfully.");
+        }
+
+        [HttpGet("checklike")]
+        [Authorize]
+        public async Task<IActionResult> CheckLike([FromQuery] int articleId)
+        {
+            if (articleId <= 0)
+            {
+                return BadRequest("Invalid ArticleId.");
+            }
+
+            // Get the current user
+            var currentUserName = HttpContext.User.Identity.Name;
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
+
+            if (currentUser == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var article = await _context.Articles
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+            if (article == null)
+            {
+                return NotFound("Article not found.");
+            }
+
+            // Deserialize the JSON string to a List<Like>
+            var likes = string.IsNullOrEmpty(article.LikesJson)
+                ? new List<Like>()
+                : JsonSerializer.Deserialize<List<Like>>(article.LikesJson);
+
+            // Check if the user has already liked the article
+            var hasLiked = likes.Any(l => l.UserId == currentUser.UserId);
+
+            return Ok(new { HasLiked = hasLiked });
+        }
+
+
 
         // DELETE: api/Articles/5
         [HttpDelete("{id}")]

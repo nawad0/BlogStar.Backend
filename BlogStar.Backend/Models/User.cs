@@ -1,7 +1,15 @@
-﻿using System;
+﻿using Humanizer;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +17,7 @@ namespace BlogStar.Backend.Models
 {
     public record UserDto(string UserName, string Password);
 
-    public record UserModel
+    public class UserModel
     {
         [Key]
         public int UserId { get; set; }
@@ -18,11 +26,8 @@ namespace BlogStar.Backend.Models
         public string Password { get; set; }
         public DateTime RegistrationDate { get; set; }
 
-        // Связь с избранными блогами
-        public List<Blog> FavoriteBlogs { get; set; } = new List<Blog>();
-
-        // Связь с избранными статьями
-        public List<Article> FavoriteArticles { get; set; } = new List<Article>();
+        // Список избранных статей
+        public string? FavoriteArticles { get; set; }
     }
 
 }

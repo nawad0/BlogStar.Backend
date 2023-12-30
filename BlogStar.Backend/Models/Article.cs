@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BlogStar.Backend.Models
@@ -20,7 +21,17 @@ namespace BlogStar.Backend.Models
         public int? BlogId { get; set; }
         public string? PublicationDate { get; set; }
         public string? ContentHtml { get; set; }
-        // Изображения и мультимедийный контент (опционально)
-        // Количество просмотров и другие статистические данные
+
+        // Store likes as a JSON string
+        public string? LikesJson { get; set; }
     }
+
+    public class Like
+    {
+        [Key]
+        public int LikeId { get; set; }
+        public int UserId { get; set; }
+    }
+
+
 }
