@@ -73,20 +73,23 @@ namespace BlogStar.Backend.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new { message = "Blog updated successfully" });
         }
 
         // POST: api/Articles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
+       
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticles()
+        public ActionResult<List<Article>> GetArticles()
         {
             if (_context.Articles == null)
             {
                 return NotFound();
             }
-            return await _context.Articles.ToListAsync();
+            var favoriteArticles = _context.Articles.ToList();
+
+            return Ok(favoriteArticles);
+          
         }
         [HttpGet("blog-articles")]
         [Authorize]
@@ -135,6 +138,7 @@ namespace BlogStar.Backend.Controllers
             article.BlogId = blogId;
             article.AuthorUserName = currentUserName;
             article.AuthorUserId = currentUser.UserId;
+            article.AuthorImagePath= currentUser.UserImagePath;
             article.PublicationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
 
             _context.Articles.Add(article);

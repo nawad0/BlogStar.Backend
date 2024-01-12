@@ -118,6 +118,7 @@ namespace BlogStar.Backend.Controllers
             }
             comment.ArticleId = articleId;
             comment.AuthorName = currentUserName;
+            comment.AuthorImagePath = currentUser.UserImagePath;
             comment.AuthorUserId = currentUser.UserId;
             comment.PublicationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
             _context.Comments.Add(comment);

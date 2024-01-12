@@ -16,6 +16,7 @@ namespace BlogStar.Backend.Models
         public string? Text{ get; set; }
         public int? AuthorUserId { get; set; }
         public string? AuthorName { get; set; }
+        public string? AuthorImagePath { get; set; }
         public int? ArticleId { get; set; }
         public string? PublicationDate { get; set; }
     }

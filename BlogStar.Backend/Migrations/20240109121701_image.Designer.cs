@@ -4,6 +4,7 @@ using BlogStar.Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogStar.Backend.Migrations
 {
     [DbContext(typeof(BlogStarDbContext))]
-    partial class BlogStarDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240109121701_image")]
+    partial class image
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,9 +31,6 @@ namespace BlogStar.Backend.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArticleId"), 1L, 1);
-
-                    b.Property<string>("AuthorImagePath")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("AuthorUserId")
                         .HasColumnType("int");
@@ -70,16 +69,10 @@ namespace BlogStar.Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BlogId"), 1L, 1);
 
-                    b.Property<string>("AuthorImagePath")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CreationDate")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("OwnerUserId")
@@ -106,9 +99,6 @@ namespace BlogStar.Backend.Migrations
 
                     b.Property<int?>("ArticleId")
                         .HasColumnType("int");
-
-                    b.Property<string>("AuthorImagePath")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AuthorName")
                         .HasColumnType("nvarchar(max)");

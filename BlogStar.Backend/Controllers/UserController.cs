@@ -99,6 +99,115 @@ namespace BlogStar.Backend.Controllers
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
+       
+        [HttpGet("users")]
+        public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
+        {
+            if (_dbContext.Users == null)
+            {
+                return NotFound();
+            }
+            return await _dbContext.Users.ToListAsync();
+        }
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<ActionResult<UserModel>> GetUserModel()
+        {
+            if (_dbContext.Users == null)
+            {
+                return NotFound();
+            }
+            var currentUserName = HttpContext.User.Identity.Name;
+            var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
+
+
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            return currentUser;
+        }
+        [HttpPut("user/{id}")]
+        [Authorize]
+        public async Task<IActionResult> PutUserModel(int id, UserModel userModel)
+        {
+            if (id != userModel.UserId)
+            {
+                return BadRequest();
+            }
+
+            // Fetch related comments, articles, and blogs
+            var relatedComments = await _dbContext.Comments
+                .Where(c => c.AuthorUserId == userModel.UserId)
+                .ToListAsync();
+
+            var relatedArticles = await _dbContext.Articles
+                .Where(a => a.AuthorUserId == userModel.UserId)
+                .ToListAsync();
+
+            var relatedBlogs = await _dbContext.Blogs
+                .Where(b => b.OwnerUserId == userModel.UserId)
+                .ToListAsync();
+
+            // Handle the file upload
+            //if (file != null && file.Length > 0)
+            //{
+            //    var imagePath = await SaveImage(file);
+            //    userModel.UserImagePath = imagePath; // Update the path in userModel
+            //}
+
+            // Update userModel in the context
+            _dbContext.Entry(userModel).State = EntityState.Modified;
+
+            // Update related comments, articles, and blogs
+            foreach (var comment in relatedComments)
+            {
+                comment.AuthorName = userModel.UserName;
+                comment.AuthorImagePath = userModel.UserImagePath;
+            }
+
+            foreach (var article in relatedArticles)
+            {
+                article.AuthorUserName = userModel.UserName;
+                article.AuthorImagePath = userModel.UserImagePath;
+            }
+
+            foreach (var blog in relatedBlogs)
+            {
+                blog.UserName = userModel.UserName;
+                blog.AuthorImagePath = userModel.UserImagePath;
+            }
+
+            try
+            {
+                // Save changes to the database
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { message = "User updated successfully" });
+        }
+
+
+        private async Task<string> SaveImage(IFormFile file)
+        {
+            var filePath = Path.Combine("D:\\projects\\BlogStar.Frontend\\BlogStar.Frontend\\BlogStar.Frontend\\src\\assets\\", file.FileName);
+            var filePath1 = Path.Combine("src\\assets\\", file.FileName);
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Return the path where the image is saved
+            return filePath1;
+        }
 
         [HttpGet("favorite-articles")]
         [Authorize] // Require authentication to access this endpoint
@@ -146,6 +255,7 @@ namespace BlogStar.Backend.Controllers
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
+
 
 
         [HttpPost("register")]

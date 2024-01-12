@@ -14,10 +14,11 @@ namespace BlogStar.Backend.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int BlogId { get; set; }
         public string? Title { get; set; }
+        public string? Image { get; set; }
         public string? Description { get; set; }
         public string? UserName { get; set; }
         public int? OwnerUserId { get; set; }
-       
+        public string? AuthorImagePath { get; set; }
         public string? CreationDate { get; set; }
 
     }

@@ -119,7 +119,7 @@ namespace BlogStar.Backend.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new { message = "Blog updated successfully" });
         }
 
 
@@ -138,6 +138,7 @@ namespace BlogStar.Backend.Controllers
                 blog.OwnerUserId = currentUser.UserId;
                 blog.CreationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
                 blog.UserName = currentUserName;
+                blog.AuthorImagePath = currentUser.UserImagePath;
                 _context.Blogs.Add(blog);
                 await _context.SaveChangesAsync();
 
