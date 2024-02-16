@@ -30,26 +30,39 @@ namespace BlogStar.Backend.Controllers
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _dbContext = dbContext;
         }
-
         [HttpPost("login")]
         //[AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest loginModel)
         {
+            if (loginModel == null || string.IsNullOrEmpty(loginModel.UserName) || string.IsNullOrEmpty(loginModel.Password))
+            {
+                return BadRequest("Некорректный запрос: логин или пароль не предоставлены.");
+            }
 
             // Проверка учетных данных пользователя
             var userDto = _userRepository.GetUser(loginModel, _dbContext);
-           
 
             if (userDto == null)
             {
-                return Unauthorized();
+                // Проверка, был ли указан существующий логин
+                var existingUsername = _userRepository.CheckIfUsernameExists(loginModel.UserName, _dbContext);
+
+                if (existingUsername)
+                {
+                    return Unauthorized("Неверный пароль.");
+                }
+                else
+                {
+                    return Unauthorized("Неверный логин.");
+                }
             }
-       
+
             // Генерация JWT токена
             var token = GenerateJwtToken(userDto);
 
             return Ok(new { Token = token });
         }
+
 
         [HttpPost("article")]
         [Authorize]
@@ -261,34 +274,57 @@ namespace BlogStar.Backend.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegistrationRequest registerModel)
         {
-            // Validate registration model
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                // Validate registration model
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Check if the username already exists
+                if (_userRepository.CheckIfUsernameExists(registerModel.UserName, _dbContext))
+                {
+                    return BadRequest("Пользователь с таким логином уже существует.");
+                }
+
+                // Create a new User entity
+                var newUser = new UserModel
+                {
+                    UserName = registerModel.UserName,
+                    Email = registerModel.Email,
+                    RegistrationDate = DateTime.UtcNow,
+                    Password = registerModel.Password,
+                    // Add other user properties as needed
+                };
+
+                // Hash the password (you should use a secure password hashing algorithm)
+
+                // Save the user to the database using your repository
+                _dbContext.Users.Add(newUser);
+                _dbContext.SaveChanges();
+
+                // Generate JWT token
+
+                return Ok();
             }
-
-
-            // Create a new User entity
-            var newUser = new UserModel
+            catch (AuthenticationException ex)
             {
-                UserName = registerModel.UserName,
-                Email = registerModel.Email,
-                RegistrationDate = DateTime.UtcNow,
-                Password = registerModel.Password,
-                // Add other user properties as needed
-            };
-
-            // Hash the password (you should use a secure password hashing algorithm)
-
-
-            // Save the user to the database using your repository
-            _dbContext.Users.Add(newUser);
-            _dbContext.SaveChanges();
-
-            // Generate JWT token
-
-            return Ok();
+                if (ex.Message == "Неверный логин.")
+                {
+                    return Unauthorized("Неверный логин.");
+                }
+                else if (ex.Message == "Неверный пароль.")
+                {
+                    return Unauthorized("Неверный пароль.");
+                }
+                else
+                {
+                    return StatusCode(500, "Ошибка сервера.");
+                }
+            }
         }
+
 
         private string GenerateJwtToken(UserDto userDto)
         {

@@ -4,6 +4,7 @@ using BlogStar.Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogStar.Backend.Migrations
 {
     [DbContext(typeof(BlogStarDbContext))]
-    partial class BlogStarDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240216171037_likesU")]
+    partial class likesU
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,9 +50,6 @@ namespace BlogStar.Backend.Migrations
                     b.Property<string>("ContentHtml")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LikesCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("LikesJson")
                         .HasColumnType("nvarchar(max)");
 
@@ -63,16 +62,6 @@ namespace BlogStar.Backend.Migrations
                     b.HasKey("ArticleId");
 
                     b.ToTable("Articles");
-
-                    b.HasData(
-                        new
-                        {
-                            ArticleId = 1,
-                            Content = "Содержание статьи...",
-                            LikesCount = 0,
-                            PublicationDate = "2024-02-16",
-                            Title = "Пример статьи"
-                        });
                 });
 
             modelBuilder.Entity("BlogStar.Backend.Models.Blog", b =>
@@ -148,7 +137,7 @@ namespace BlogStar.Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LikeId"), 1L, 1);
 
-                    b.Property<int>("ArticleId")
+                    b.Property<int>("ArtilcleId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -156,29 +145,9 @@ namespace BlogStar.Backend.Migrations
 
                     b.HasKey("LikeId");
 
-                    b.HasIndex("ArticleId");
+                    b.HasIndex("ArtilcleId");
 
                     b.ToTable("Likes");
-
-                    b.HasData(
-                        new
-                        {
-                            LikeId = 1,
-                            ArticleId = 1,
-                            UserId = 1
-                        },
-                        new
-                        {
-                            LikeId = 2,
-                            ArticleId = 1,
-                            UserId = 2
-                        },
-                        new
-                        {
-                            LikeId = 3,
-                            ArticleId = 1,
-                            UserId = 3
-                        });
                 });
 
             modelBuilder.Entity("BlogStar.Backend.Models.UserModel", b =>
@@ -219,7 +188,7 @@ namespace BlogStar.Backend.Migrations
                 {
                     b.HasOne("BlogStar.Backend.Models.Article", "Article")
                         .WithMany("Likes")
-                        .HasForeignKey("ArticleId")
+                        .HasForeignKey("ArtilcleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

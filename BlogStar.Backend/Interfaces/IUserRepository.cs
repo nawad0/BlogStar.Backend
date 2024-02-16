@@ -11,6 +11,7 @@ namespace BlogStar.Backend.Interfaces
     public interface IUserRepository
     {
         UserDto GetUser(LoginRequest userModel, BlogStarDbContext _dbContext);
+        public bool CheckIfUsernameExists(string username, BlogStarDbContext dbContext);
     }
 
 }

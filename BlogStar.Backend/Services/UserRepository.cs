@@ -26,32 +26,54 @@ namespace BlogStar.Backend.Services
     //    string.Equals(u.Password, userModel.Password)) ??
     //    throw new DllNotFoundException("User not found");
 
-    //}
+    //}CheckIfUsernameExists
+    public class AuthenticationException : Exception
+    {
+        public AuthenticationException(string message)
+            : base(message)
+        {
+        }
+    }
     public class UserRepository : IUserRepository
     {
         private readonly BlogStarDbContext _dbContext;
 
-        
 
-        public UserDto GetUser(LoginRequest userModel, BlogStarDbContext _dbContext)
+
+        public bool CheckIfUsernameExists(string username, BlogStarDbContext dbContext)
         {
-            // Fetch the user from the database
-            var userEntity = _dbContext.Users
-                .FirstOrDefault(u => u.UserName == userModel.UserName && u.Password == userModel.Password);
+            // Check if a user with the specified username exists in the database
+            var userExists = dbContext.Users.Any(u => u.UserName == username);
 
-            // If user not found, throw an exception
+            return userExists;
+        }
+
+        public UserDto GetUser(LoginRequest userModel, BlogStarDbContext dbContext)
+        {
+            // Поиск пользователя с таким логином в базе данных
+            var userEntity = dbContext.Users.FirstOrDefault(u => u.UserName == userModel.UserName);
+
+            // Если пользователь с таким логином не найден
             if (userEntity == null)
             {
-                throw new UnauthorizedAccessException("Invalid username or password");
+                return null;
+                //throw new AuthenticationException("Неверный логин.");
+            }
+
+            // Проверка пароля
+            if (userEntity.Password != userModel.Password)
+            {
+                return null;
+                //throw new AuthenticationException("Неверный пароль.");
             }
 
             // Map the UserEntity to UserDto or create a UserDto instance based on your needs
             var userDto = new UserDto(userEntity.UserName, userEntity.Password);
-                
-            
 
             return userDto;
         }
+
+
     }
 
 }

@@ -1,18 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="BlogStar.Backend.Models.Article">
-    <Position X="6.5" Y="2" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAIAAAAAAgABAEAAAAAAAAAAAAAAAIACgAAAUAAAAAA=</HashCode>
-      <FileName>Models\Article.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="BlogStar.Backend.Models.Blog">
     <Position X="8.25" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAAAAAAAAAAhAEAAAAAAAAAAAAAAAAAEAQAAAAAAAAA=</HashCode>
+      <HashCode>QAAAAAAAAAAhAEAAAAAAAAAABAAAABAEAQAAAAAAAAA=</HashCode>
       <FileName>Models\Blog.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="BlogStar.Backend.Models.Like">
+    <Position X="3.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAEAgAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Models\Like.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ArticleId" />
+      <Property Name="Article" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="BlogStar.Backend.Models.Article">
+    <Position X="5.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAgABAEAAAAAAAAAABAAAAIACgAAAUAAAAAA=</HashCode>
+      <FileName>Models\Article.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Likes" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="System.Int32">
+    <Position X="10" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="System.Collections.Generic.ICollection&lt;T&gt;">
+    <Position X="2.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

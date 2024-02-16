@@ -12,6 +12,10 @@ using System.Reflection.Metadata;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using System.Text.Json;
+using MagicVilla_VillaAPI.Models;
+using System.Net;
+using BlogStar.Backend.Repository.IRepository;
+using System.Text.Json.Serialization;
 
 namespace BlogStar.Backend.Controllers
 {
@@ -20,29 +24,106 @@ namespace BlogStar.Backend.Controllers
     public class ArticlesController : ControllerBase
     {
         private readonly BlogStarDbContext _context;
+        protected APIResponse _response;
+        private readonly IArticleRepository _db;
 
-        public ArticlesController(BlogStarDbContext context)
+        public ArticlesController(BlogStarDbContext context, IArticleRepository db)
         {
             _context = context;
+            _db = db;
+            _response = new APIResponse();
         }
 
-        // GET: api/Articles
-        // GET: api/Articles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Article>> GetArticle(int id)
+        [HttpGet]
+        //[Authorize]
+        //[ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetArticles([FromQuery] string? search, int pageSize = 0, int pageNumber = 1)
         {
-            if (_context.Articles == null)
+            try
             {
-                return NotFound();
-            }
-            var article = await _context.Articles.FindAsync(id);
+                IEnumerable<Article> articleList;
 
-            if (article == null)
+                articleList = await _db.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber, includeProperties: "Likes");
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    articleList = articleList.Where(u => u.Content.ToLower().Contains(search));
+                }
+
+                // Вычисляем количество лайков для каждой статьи
+                foreach (var article in articleList)
+                {
+                    article.LikesCount = article.Likes.Count;
+                }
+
+                Pagination pagination = new Pagination()
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                };
+                JsonSerializerOptions options = new()
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    WriteIndented = true
+                };
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+                _response.Result = articleList;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                _response.IsSuccess = false;
+                _response.ErrorMessages = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
+
+        [HttpGet("{id:int}", Name = "GetVilla")]
+        //[ResponseCache(CacheProfileName = "Default30")]
+        //[ProducesResponseType(200, Type = typeof(VillaDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetVilla(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Id cannot be equal to 0");
+                    return BadRequest(_response);
+                }
+
+                // Используем Include для загрузки лайков вместе со статьей
+                var villa = await _db.GetAsync(u => u.ArticleId == id, includeProperties: "Likes");
+
+                if (villa == null)
+                {
+                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Get Villa Error with Id" + id);
+                    return NotFound(_response);
+                }
+
+                // Теперь у вас должно быть корректное количество лайков
+                _response.Result = villa.Likes.Count;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages = new List<string>() { ex.ToString() };
             }
 
-            return article;
+            return _response;
         }
 
         // PUT: api/Articles/5
@@ -79,18 +160,6 @@ namespace BlogStar.Backend.Controllers
         // POST: api/Articles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
        
-        [HttpGet]
-        public ActionResult<List<Article>> GetArticles()
-        {
-            if (_context.Articles == null)
-            {
-                return NotFound();
-            }
-            var favoriteArticles = _context.Articles.ToList();
-
-            return Ok(favoriteArticles);
-          
-        }
         [HttpGet("blog-articles")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<Article>>> GetUserBlogs(int blogId)
@@ -139,6 +208,7 @@ namespace BlogStar.Backend.Controllers
             article.AuthorUserName = currentUserName;
             article.AuthorUserId = currentUser.UserId;
             article.AuthorImagePath= currentUser.UserImagePath;
+            article.LikesJson = "[]";
             article.PublicationDate = DateTime.Now.ToString("ddd, dd MMM yyyy");
 
             _context.Articles.Add(article);

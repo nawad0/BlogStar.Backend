@@ -7,11 +7,24 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using BlogStar.Backend.Repository.IRepository;
+using BlogStar.Backend.Repository;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Text.Json;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+//;builder.Services.AddControllers(options =>
+//{
+//    options.OutputFormatters.RemoveType<SystemTextJsonOutputFormatter>();
+//    options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(new JsonSerializerOptions(JsonSerializerDefaults.Web)
+//    {
+//        ReferenceHandler = ReferenceHandler.Preserve,
+//    }));
+//});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,7 +32,7 @@ builder.Services.AddDbContext<BlogStarDbContext>(options => options.UseSqlServer
     builder.Configuration.GetConnectionString("DefaultConnection")));
 //builder.Services.AddDbContext<BlogStarDbContext>(options =>
 //       options.UseInMemoryDatabase("InMemoryDatabase"));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddSingleton<ITokenService>(new TokenService());
 builder.Services.AddSingleton<IUserRepository>(new UserRepository());
 builder.Services.AddAuthorization();

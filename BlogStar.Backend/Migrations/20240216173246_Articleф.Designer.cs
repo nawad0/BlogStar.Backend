@@ -4,6 +4,7 @@ using BlogStar.Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogStar.Backend.Migrations
 {
     [DbContext(typeof(BlogStarDbContext))]
-    partial class BlogStarDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240216173246_Articleф")]
+    partial class Articleф
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,9 +50,6 @@ namespace BlogStar.Backend.Migrations
                     b.Property<string>("ContentHtml")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LikesCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("LikesJson")
                         .HasColumnType("nvarchar(max)");
 
@@ -69,7 +68,6 @@ namespace BlogStar.Backend.Migrations
                         {
                             ArticleId = 1,
                             Content = "Содержание статьи...",
-                            LikesCount = 0,
                             PublicationDate = "2024-02-16",
                             Title = "Пример статьи"
                         });

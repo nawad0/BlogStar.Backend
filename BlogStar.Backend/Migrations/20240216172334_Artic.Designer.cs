@@ -4,6 +4,7 @@ using BlogStar.Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogStar.Backend.Migrations
 {
     [DbContext(typeof(BlogStarDbContext))]
-    partial class BlogStarDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240216172334_Artic")]
+    partial class Artic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,9 +50,6 @@ namespace BlogStar.Backend.Migrations
                     b.Property<string>("ContentHtml")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LikesCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("LikesJson")
                         .HasColumnType("nvarchar(max)");
 
@@ -68,10 +67,14 @@ namespace BlogStar.Backend.Migrations
                         new
                         {
                             ArticleId = 1,
-                            Content = "Содержание статьи...",
-                            LikesCount = 0,
-                            PublicationDate = "2024-02-16",
-                            Title = "Пример статьи"
+                            AuthorImagePath = "author.jpg",
+                            AuthorUserId = 1,
+                            AuthorUserName = "AuthorName",
+                            BlogId = 1,
+                            Content = "This is an example article content.",
+                            ContentHtml = "<p>This is an example article content.</p>",
+                            PublicationDate = "16.02.2024 20:23:34",
+                            Title = "Example Article"
                         });
                 });
 
@@ -172,12 +175,6 @@ namespace BlogStar.Backend.Migrations
                             LikeId = 2,
                             ArticleId = 1,
                             UserId = 2
-                        },
-                        new
-                        {
-                            LikeId = 3,
-                            ArticleId = 1,
-                            UserId = 3
                         });
                 });
 

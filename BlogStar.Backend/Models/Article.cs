@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Hosting;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -23,17 +24,15 @@ namespace BlogStar.Backend.Models
         public int? BlogId { get; set; }
         public string? PublicationDate { get; set; }
         public string? ContentHtml { get; set; }
+        [JsonIgnore]
+        public ICollection<Like> Likes { get; set; }
 
         // Store likes as a JSON string
         public string? LikesJson { get; set; }
+        public int LikesCount { get; set; }
     }
 
-    public class Like
-    {
-        [Key]
-        public int LikeId { get; set; }
-        public int UserId { get; set; }
-    }
+    
 
 
 }
