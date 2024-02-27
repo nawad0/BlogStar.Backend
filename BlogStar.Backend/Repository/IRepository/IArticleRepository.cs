@@ -8,7 +8,7 @@ namespace BlogStar.Backend.Repository.IRepository
     public interface IArticleRepository : IRepository<Article>
     {
 
-        Task<BlogStarDbContext> UpdateAsync(Article entity);
+        Task<Article> UpdateAsync(Article entity);
 
 
 

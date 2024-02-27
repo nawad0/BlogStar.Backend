@@ -17,18 +17,15 @@ namespace BlogStar.Backend.Repository
         {
             _db = db;
         }
-   
-        //public async Task<BlogStarDbContext> UpdateAsync(Villa entity)
-        //{
-        //    entity.UpdatedDate = DateTime.Now;
-        //    _db.At.Update(entity);
-        //    await _db.SaveChangesAsync();
-        //    return entity;
-        //}
 
-        public Task<BlogStarDbContext> UpdateAsync(Article entity)
+        public async Task<Article> UpdateAsync(Article entity)
         {
-            throw new NotImplementedException();
+            
+            _db.Articles.Update(entity);
+            await _db.SaveChangesAsync();
+            return entity;
         }
+
+
     }
 }

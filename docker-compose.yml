@@ -1,0 +1,39 @@
+﻿version: '3.9'
+networks:
+  demoblazorapp:
+services:
+  ms-sql-server:
+    container_name: app-db
+    image: mcr.microsoft.com/mssql/server:latest
+    ports:
+      - 1433:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Pa55w0rd2019
+    networks:
+      - demoblazorapp
+  app:
+    container_name: blogstar
+    build:
+      context: .
+      dockerfile: BlogStar.Backend\Dockerfile
+    ports:
+      - "8003:80"  # Оставляем HTTP порт
+      - "8004:443" 
+    networks:
+      - demoblazorapp 
+    depends_on:
+      - ms-sql-server
+    environment:
+      - DB_HOST=ms-sql-server
+      - DB_NAME=Demo
+      - DB_SA_PASSWORD=Pa55w0rd2019
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=123
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro  # Монтируем директорию с сертификатами в контейнер
+
+
+

@@ -28,8 +28,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<BlogStarDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection")));
+//builder.Services.AddDbContext<BlogStarDbContext>(options => options.UseSqlServer(
+//    builder.Configuration.GetConnectionString("DefaultConnection")));
+var server = "localhost";
+var port = "1433";
+var user = "SA";
+var password = "Pa55w0rd2019";
+var database = "blogDB";
+
+builder.Services.AddDbContext<BlogStarDbContext>(options => 
+options.UseSqlServer($"Server = {server}, {port}; Initial Catalog = {database}; User ID = {user}; Password = {password}"));
 //builder.Services.AddDbContext<BlogStarDbContext>(options =>
 //       options.UseInMemoryDatabase("InMemoryDatabase"));
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
